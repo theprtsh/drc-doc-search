@@ -13,7 +13,6 @@ class RemoteScanner:
         Runs ssh command for each configured path separately.
         Returns a list of local file paths containing the snapshots.
         """
-        timestamp = int(time.time())
         Config.SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
         
         generated_files = []
@@ -23,7 +22,7 @@ class RemoteScanner:
             safe_path_name = remote_path.strip("/").replace("/", "_")
             
             # 2. Construct filename: timestamp-path-host.txt
-            filename = f"{Config.SSH_HOST}-{safe_path_name}-{timestamp}.txt"
+            filename = f"{Config.SSH_HOST}-{safe_path_name}.txt"
             output_file = Config.SNAPSHOT_DIR / filename
             
             # 3. Build SSH command for this specific path
