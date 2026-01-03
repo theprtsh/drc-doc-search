@@ -46,8 +46,7 @@ class DatabaseManager:
 
     def fetch_missing_rows(self, source_table: str, dest_table: str) -> List[Dict[str, Any]]:
         """
-        Fetches rows from source that are NOT yet in the destination table.
-        LEFT JOIN where dest.id is NULL.
+        Fetches rows from source that are NOT in dest OR are in dest but marked as not found.
         """
         sql = f"""
             SELECT 
@@ -56,17 +55,24 @@ class DatabaseManager:
                 s.date_crea, 
                 s.scan_titre, 
                 s.colissage, 
-                s.scan_valeur 
+                s.scan_valeur,
+                d.scan_titre_exist,
+                d.colissage_exist,
+                d.scan_valeur_exist
             FROM `{source_table}` s
             LEFT JOIN `{dest_table}` d ON s.id = d.id
-            WHERE d.id IS NULL
+            WHERE 
+                d.id IS NULL 
+                OR d.scan_titre_exist = 0 
+                OR d.colissage_exist = 0 
+                OR d.scan_valeur_exist = 0
         """
         
         with self.conn.cursor() as cursor:
-            log.info(f"Fetching new records from {source_table} (missing in {dest_table})...")
+            log.info(f"Fetching records to sync from {source_table}...")
             cursor.execute(sql)
             rows = cursor.fetchall()
-            log.info(f"Found {len(rows)} new rows to process.")
+            log.info(f"Found {len(rows)} rows to process (New + Retries).")
             return rows
 
     def batch_upsert(self, dest_table: str, data: List[Dict[str, Any]]):
