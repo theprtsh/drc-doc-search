@@ -11,9 +11,9 @@ cp .env.example .env
 ```
 
 ### 2. Auth
-Place your private key in the project root. Ensure the filename matches `config.py` (default: `ssh-key.key`).
+Place your private key in the project root. Ensure the filename matches `config.py` (default: `ssh.key`).
 ```bash
-chmod 600 ssh-key.key
+chmod 600 ssh.key
 ```
 
 ### 3. Dependencies
