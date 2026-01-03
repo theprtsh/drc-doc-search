@@ -20,7 +20,7 @@ class DatabaseManager:
 
     def ensure_table(self, dest_table: str):
         """
-        Creates the destination table (feri_docs/fere_docs) if it doesn't exist.
+        Creates the destination table if it doesn't exist.
         """
         sql = f"""
         CREATE TABLE IF NOT EXISTS `{dest_table}` (
@@ -47,9 +47,8 @@ class DatabaseManager:
     def fetch_missing_rows(self, source_table: str, dest_table: str) -> List[Dict[str, Any]]:
         """
         Fetches rows from source that are NOT yet in the destination table.
-        Logic: LEFT JOIN where dest.id is NULL.
+        LEFT JOIN where dest.id is NULL.
         """
-        # Note: We assume 'date_crea' exists in the source table based on requirements.
         sql = f"""
             SELECT 
                 s.id, 
@@ -70,6 +69,43 @@ class DatabaseManager:
             log.info(f"Found {len(rows)} new rows to process.")
             return rows
 
+    def batch_upsert(self, dest_table: str, data: List[Dict[str, Any]]):
+        """
+        Inserts new records or updates them
+        """
+        if not data:
+            return
+
+        # Columns matching the destination schema
+        columns = [
+            "id", "numero", "date_crea", "hostname",
+            "scan_titre", "scan_titre_exist", "scan_titre_path",
+            "colissage", "colissage_exist", "colissage_path",
+            "scan_valeur", "scan_valeur_exist", "scan_valeur_path"
+        ]
+        
+        # Prepare SQL statement
+        placeholders = ", ".join(["%s"] * len(columns))
+        col_names = ", ".join([f"`{c}`" for c in columns])
+        
+        # ON DUPLICATE KEY UPDATE: Update fields that might change (mostly paths/flags)
+        # We exclude ID, numero, date_crea from update usually, but here we update paths/flags.
+        update_clause = ", ".join([f"`{c}`=VALUES(`{c}`)" for c in columns if c not in ["id", "numero", "date_crea"]])
+
+        sql = f"INSERT INTO `{dest_table}` ({col_names}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {update_clause}"
+
+        values = []
+        for row in data:
+            # Create a tuple in the exact order of 'columns'
+            values.append(tuple(row.get(c) for c in columns))
+
+        # Execute in batches of 1000
+        batch_size = 1000
+        with self.conn.cursor() as cursor:
+            for i in range(0, len(values), batch_size):
+                batch = values[i:i + batch_size]
+                cursor.executemany(sql, batch)
+                log.info(f"Upserted batch {i} to {i+len(batch)} into {dest_table}")
 
     def close(self):
         self.conn.close()
