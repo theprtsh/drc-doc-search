@@ -8,22 +8,29 @@ log = get_logger()
 
 class DatabaseManager:
     def __init__(self):
+
+        # Connect using DEST_DB
         self.conn = pymysql.connect(
-            host=Config.DB_HOST,
-            user=Config.DB_USER,
-            password=Config.DB_PASS,
-            database=Config.DB_NAME,
-            port=Config.DB_PORT,
+            host=Config.DEST_DB_HOST,
+            user=Config.DEST_DB_USER,
+            password=Config.DEST_DB_PASSWD,
+            database=Config.DEST_DB_NAME,
+            port=Config.DEST_DB_PORT,
             cursorclass=DictCursor,
             autocommit=True
         )
+        self.src_db = Config.SRC_DB_NAME
+        self.dest_db = Config.DEST_DB_NAME
 
     def ensure_table(self, dest_table: str):
         """
         Creates the destination table if it doesn't exist.
         """
         sql = f"""
-        CREATE TABLE IF NOT EXISTS `{dest_table}` (
+        Creates the destination table if it doesn't exist.
+        """
+        sql = f"""
+        CREATE TABLE IF NOT EXISTS `{self.dest_db}`.`{dest_table}` (
             `id` int NOT NULL,
             `numero` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
             `date_crea` DATETIME DEFAULT NULL, 
@@ -59,8 +66,8 @@ class DatabaseManager:
                 d.scan_titre_exist,
                 d.colissage_exist,
                 d.scan_valeur_exist
-            FROM `{source_table}` s
-            LEFT JOIN `{dest_table}` d ON s.id = d.id
+            FROM `{self.src_db}`.`{source_table}` s
+            LEFT JOIN `{self.dest_db}`.`{dest_table}` d ON s.id = d.id
             WHERE 
                 d.id IS NULL 
                 OR d.scan_titre_exist = 0 
@@ -98,7 +105,7 @@ class DatabaseManager:
         # We exclude ID, numero, date_crea from update usually, but here we update paths/flags.
         update_clause = ", ".join([f"`{c}`=VALUES(`{c}`)" for c in columns if c not in ["id", "numero", "date_crea"]])
 
-        sql = f"INSERT INTO `{dest_table}` ({col_names}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {update_clause}"
+        sql = f"INSERT INTO `{self.dest_db}`.`{dest_table}` ({col_names}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {update_clause}"
 
         values = []
         for row in data:
