@@ -1,21 +1,20 @@
 import sys
 from .log import get_logger
-from .remote import RemoteScanner
+from .scanner import RemoteScanner, LocalScanner, Scanner
 from .db import DatabaseManager
 from .processor import FileProcessor
 from .config import Config
 
 log = get_logger()
 
-def main():
+def run_sync(scanner: Scanner):
     log.info("Starting sync process...")
 
-    # 1. Generate Remote Snapshots
-    scanner = RemoteScanner()
+    # Generate Snapshots
     try:
         snapshot_files = scanner.generate_snapshots()
     except Exception as e:
-        log.critical(f"Failed to get remote snapshots: {e}")
+        log.critical(f"Failed to generate snapshots: {e}")
         sys.exit(1)
 
     # 2. Load Snapshots into Memory (Processor)
@@ -53,5 +52,16 @@ def main():
 
     log.info("Sync process finished successfully.")
 
+def main_remote():
+    log.info("Mode: Remote Sync")
+    scanner = RemoteScanner()
+    run_sync(scanner)
+
+def main_local():
+    log.info("Mode: Local Sync")
+    scanner = LocalScanner()
+    run_sync(scanner)
+
+# default
 if __name__ == "__main__":
-    main()
+    main_local()
