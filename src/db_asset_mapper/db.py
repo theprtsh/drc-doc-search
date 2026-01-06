@@ -27,9 +27,6 @@ class DatabaseManager:
         Creates the destination table if it doesn't exist.
         """
         sql = f"""
-        Creates the destination table if it doesn't exist.
-        """
-        sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.dest_db}`.`{dest_table}` (
             `id` int NOT NULL,
             `numero` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,

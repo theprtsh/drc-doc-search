@@ -1,13 +1,15 @@
-# DRC Documents Search
+# DB Asset Mapper
 
-High-throughput synchronization engine connecting local MySQL metadata with remote filesystem paths via SSH. Designed for idempotency and speed.
+High-throughput asset mapper. Links MySQL records to filesystem paths via Local I/O or SSH with flexible Source/Destination database. Designed for idempotency and speed.
 
 ## Quick Start
 
 ### 1. Environment
 ```bash
 cp .env.example .env
-# Edit .env with your MySQL credentials and SSH user/host
+# Edit .env with 
+# 1. MySQL credentials for source and destination table
+# 2. SSH user/host if searching from remote
 ```
 
 ### 2. Auth
@@ -26,12 +28,17 @@ uv sync
 Modify `src/drc_doc_search/config.py` to tweak:
 
 *   **`TABLE_MAP`**: `{"source_table": "dest_table"}`
-*   **`REMOTE_PATHS`**: List of absolute remote directories to index.
+*   **`PATHS`**: List of absolute remote directories to index.
 
 ## Usage
 
+1. If searching locally
 ```bash
-uv run main
+uv run start
+```
+2. If searching from remote
+```bash
+uv run start-remote
 ```
 
 ## Logic

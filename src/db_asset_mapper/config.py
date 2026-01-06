@@ -33,7 +33,7 @@ class Config:
         "fere": "fere_docs"
     }
 
-    REMOTE_PATHS = [
+    PATHS = [
         "/app/data/continuite",
         "/app/amazon/continuite"
     ]

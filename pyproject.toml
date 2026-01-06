@@ -1,7 +1,7 @@
 [project]
-name = "drc-doc-search"
+name = "db-asset-mapper"
 version = "0.1.0"
-description = "Add your description here"
+description = "Maps database assets to filesystem paths"
 readme = "README.md"
 authors = [
     { name = "prtsh", email = "134041561+theprtsh@users.noreply.github.com" }
@@ -14,8 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-start = "drc_doc_search.main:main_local"
-start-remote = "drc_doc_search.main:main_remote"
+start = "db_asset_mapper.main:main_local"
+start-remote = "db_asset_mapper.main:main_remote"
 
 [build-system]
 requires = ["uv_build>=0.9.20,<0.10.0"]

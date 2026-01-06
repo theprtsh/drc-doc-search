@@ -23,7 +23,7 @@ class RemoteScanner:
         
         # SSH cmd with ALL paths
         # find /app/data/continuite /app/amazon/continuite -type f
-        remote_paths_str = " ".join(Config.REMOTE_PATHS)
+        remote_paths_str = " ".join(Config.PATHS)
         remote_cmd = f"find {remote_paths_str} -type f"
         
         ssh_cmd = [
@@ -66,9 +66,9 @@ class LocalScanner:
         output_file = Config.SNAPSHOT_DIR / filename
         
         # command with ALL paths
-        paths_str = " ".join(Config.REMOTE_PATHS)
+        paths_str = " ".join(Config.PATHS)
         
-        find_cmd = ["find"] + Config.REMOTE_PATHS + ["-type", "f"]
+        find_cmd = ["find"] + Config.PATHS + ["-type", "f"]
         
         log.info(f"Scanning local paths: {paths_str}")
         log.info(f"Saving to: {output_file}")
