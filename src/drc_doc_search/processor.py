@@ -44,7 +44,7 @@ class FileProcessor:
         Iterates through DB rows and finds matching files in the index.
         """
         processed_rows = []
-        host_str = f"{Config.SSH_HOST}"
+        host_str = Config.SSH_HOST if Config.SSH_HOST else "local"
 
         for row in rows:
             # Set host
